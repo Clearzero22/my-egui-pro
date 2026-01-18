@@ -70,7 +70,10 @@ fn render_story_card(ui: &mut egui::Ui, story_display: &StoryDisplay) {
     });
 
     ui.add_space(5.0);
-    ui.label(format!("🔗 {}", story.title));
+
+    let hn_url = story_display.hn_url();
+    let url_to_open = story.url.as_ref().unwrap_or(&hn_url);
+    ui.hyperlink_to(format!("🔗 {}", story.title), url_to_open);
 
     if let Some(ref domain) = story_display.domain {
         ui.label(format!("({})", domain));
