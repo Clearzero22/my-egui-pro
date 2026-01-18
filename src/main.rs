@@ -1,8 +1,10 @@
 mod app;
 mod category;
+mod config;
 mod hn_api;
 mod storage;
 mod story;
+mod theme;
 mod ui;
 
 use eframe::egui;

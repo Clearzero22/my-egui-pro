@@ -3,6 +3,8 @@ use crate::{
     hn_api::{create_client, fetch_category},
     story::{Story, StoryDisplay},
     storage::FavoritesDB,
+    config::Config,
+    theme::{GruvboxTheme, apply_theme},
     ui,
 };
 use eframe::egui;
@@ -24,9 +26,11 @@ pub struct HackerNewsApp {
     pub favorite_ids: HashSet<u64>,
     pub is_loading: bool,
     pub error_message: Option<String>,
+    pub theme: GruvboxTheme,
     runtime: tokio::runtime::Runtime,
     client: Client,
     db: FavoritesDB,
+    config: Config,
     pending_stories: Arc<Mutex<Option<Vec<StoryDisplay>>>>,
     pending_error: Arc<Mutex<Option<String>>>,
 }
@@ -40,6 +44,10 @@ impl HackerNewsApp {
             panic!("Failed to open favorites database");
         });
 
+        let config = Config::new();
+        let app_config = config.load();
+        let theme = app_config.theme;
+
         let favorite_ids = Self::load_favorites(&db);
         let saved_stories = Self::load_saved_stories(&db);
 
@@ -51,9 +59,11 @@ impl HackerNewsApp {
             favorite_ids,
             is_loading: false,
             error_message: None,
+            theme,
             runtime,
             client,
             db,
+            config,
             pending_stories: Arc::new(Mutex::new(None)),
             pending_error: Arc::new(Mutex::new(None)),
         };
@@ -127,6 +137,18 @@ impl HackerNewsApp {
         }
     }
 
+    pub fn toggle_theme(&mut self) {
+        self.theme = match self.theme {
+            GruvboxTheme::Dark => GruvboxTheme::Light,
+            GruvboxTheme::Light => GruvboxTheme::Dark,
+        };
+
+        let updated_config = crate::config::AppConfig {
+            theme: self.theme,
+        };
+        let _ = self.config.save(&updated_config);
+    }
+
     fn check_pending_updates(&mut self) {
         if let Ok(mut guard) = self.pending_stories.try_lock() {
             if let Some(stories) = guard.take() {
@@ -148,6 +170,8 @@ impl HackerNewsApp {
 impl eframe::App for HackerNewsApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.check_pending_updates();
+
+        apply_theme(ctx, &self.theme);
 
         ui::render_sidebar(ctx, self);
         ui::render_story_list(ctx, self);

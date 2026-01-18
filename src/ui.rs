@@ -26,6 +26,23 @@ pub fn render_sidebar(ctx: &egui::Context, app: &mut HackerNewsApp) {
             ui.separator();
             ui.add_space(10.0);
 
+            // Theme toggle
+            ui.heading("Theme");
+            ui.add_space(5.0);
+
+            let theme_label = match app.theme {
+                crate::theme::GruvboxTheme::Dark => "🌙 Dark",
+                crate::theme::GruvboxTheme::Light => "☀️ Light",
+            };
+
+            if ui.button(theme_label).clicked() {
+                app.toggle_theme();
+            }
+
+            ui.add_space(10.0);
+            ui.separator();
+            ui.add_space(10.0);
+
             // Categories (only show in Fetched mode)
             if app.view_mode == ViewMode::Fetched {
                 ui.heading("Categories");
