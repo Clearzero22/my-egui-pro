@@ -7,10 +7,61 @@ pub enum GruvboxTheme {
     Light,
 }
 
+impl GruvboxTheme {
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            GruvboxTheme::Dark => "🌙 Dark",
+            GruvboxTheme::Light => "☀️ Light",
+        }
+    }
+
+    fn colors(&self) -> ThemeColors {
+        match self {
+            GruvboxTheme::Dark => ThemeColors {
+                dark_mode: true,
+                bg: GruvboxDark::BG,
+                bg0: GruvboxDark::BG0,
+                bg1: GruvboxDark::BG1,
+                bg2: GruvboxDark::BG2,
+                fg: GruvboxDark::FG,
+                fg3: GruvboxDark::FG3,
+                red: GruvboxDark::RED,
+                blue: GruvboxDark::BLUE,
+                orange: GruvboxDark::ORANGE,
+            },
+            GruvboxTheme::Light => ThemeColors {
+                dark_mode: false,
+                bg: GruvboxLight::BG,
+                bg0: GruvboxLight::BG0,
+                bg1: GruvboxLight::BG1,
+                bg2: GruvboxLight::BG2,
+                fg: GruvboxLight::FG,
+                fg3: GruvboxLight::FG3,
+                red: GruvboxLight::RED,
+                blue: GruvboxLight::BLUE,
+                orange: GruvboxLight::ORANGE,
+            },
+        }
+    }
+}
+
 impl Default for GruvboxTheme {
     fn default() -> Self {
         GruvboxTheme::Dark
     }
+}
+
+struct ThemeColors {
+    dark_mode: bool,
+    bg: Color32,
+    bg0: Color32,
+    bg1: Color32,
+    bg2: Color32,
+    fg: Color32,
+    fg3: Color32,
+    red: Color32,
+    blue: Color32,
+    orange: Color32,
 }
 
 pub struct GruvboxDark;
@@ -68,79 +119,32 @@ impl GruvboxLight {
 pub fn apply_theme(ctx: &eframe::egui::Context, theme: &GruvboxTheme) {
     let mut style = (*ctx.style()).clone();
     let visuals = &mut style.visuals;
+    let c = theme.colors();
 
-    match theme {
-        GruvboxTheme::Dark => {
-            visuals.dark_mode = true;
-            visuals.panel_fill = GruvboxDark::BG;
-            visuals.faint_bg_color = GruvboxDark::BG1;
-            visuals.extreme_bg_color = GruvboxDark::BG0;
-            visuals.code_bg_color = GruvboxDark::BG1;
-            visuals.warn_fg_color = GruvboxDark::ORANGE;
-            visuals.error_fg_color = GruvboxDark::RED;
-            visuals.selection.bg_fill = GruvboxDark::BLUE;
-            visuals.hyperlink_color = GruvboxDark::BLUE;
-        }
-        GruvboxTheme::Light => {
-            visuals.dark_mode = false;
-            visuals.panel_fill = GruvboxLight::BG;
-            visuals.faint_bg_color = GruvboxLight::BG1;
-            visuals.extreme_bg_color = GruvboxLight::BG0;
-            visuals.code_bg_color = GruvboxLight::BG1;
-            visuals.warn_fg_color = GruvboxLight::ORANGE;
-            visuals.error_fg_color = GruvboxLight::RED;
-            visuals.selection.bg_fill = GruvboxLight::BLUE;
-            visuals.hyperlink_color = GruvboxLight::BLUE;
-        }
-    }
+    // Base colors
+    visuals.dark_mode = c.dark_mode;
+    visuals.panel_fill = c.bg;
+    visuals.faint_bg_color = c.bg1;
+    visuals.extreme_bg_color = c.bg0;
+    visuals.code_bg_color = c.bg1;
+    visuals.warn_fg_color = c.orange;
+    visuals.error_fg_color = c.red;
+    visuals.override_text_color = Some(c.fg);
 
-    // Update text styles
-    let text_color = match theme {
-        GruvboxTheme::Dark => GruvboxDark::FG,
-        GruvboxTheme::Light => GruvboxLight::FG,
-    };
-
-    // Override text color for all text styles
-    for (_text_style, font_id) in &mut style.text_styles {
-        // We can't directly set color on font_id, so we set override_text_color
-    }
-    visuals.override_text_color = Some(text_color);
+    // Interactive elements
+    visuals.selection.bg_fill = c.blue;
+    visuals.selection.stroke.color = c.blue;
+    visuals.hyperlink_color = c.blue;
 
     // Button colors
-    match theme {
-        GruvboxTheme::Dark => {
-            visuals.widgets.active.bg_fill = GruvboxDark::BG2;
-            visuals.widgets.hovered.bg_fill = GruvboxDark::BG1;
-            visuals.widgets.inactive.bg_fill = GruvboxDark::BG;
-            visuals.widgets.active.fg_stroke.color = GruvboxDark::FG;
-            visuals.widgets.hovered.fg_stroke.color = GruvboxDark::FG;
-            visuals.widgets.inactive.fg_stroke.color = GruvboxDark::FG3;
-            visuals.widgets.noninteractive.bg_fill = GruvboxDark::BG;
-            visuals.widgets.noninteractive.fg_stroke.color = GruvboxDark::FG3;
-        }
-        GruvboxTheme::Light => {
-            visuals.widgets.active.bg_fill = GruvboxLight::BG2;
-            visuals.widgets.hovered.bg_fill = GruvboxLight::BG1;
-            visuals.widgets.inactive.bg_fill = GruvboxLight::BG;
-            visuals.widgets.active.fg_stroke.color = GruvboxLight::FG;
-            visuals.widgets.hovered.fg_stroke.color = GruvboxLight::FG;
-            visuals.widgets.inactive.fg_stroke.color = GruvboxLight::FG3;
-            visuals.widgets.noninteractive.bg_fill = GruvboxLight::BG;
-            visuals.widgets.noninteractive.fg_stroke.color = GruvboxLight::FG3;
-        }
-    }
-
-    // Selection
-    match theme {
-        GruvboxTheme::Dark => {
-            visuals.selection.bg_fill = GruvboxDark::BLUE;
-            visuals.selection.stroke.color = GruvboxDark::BLUE;
-        }
-        GruvboxTheme::Light => {
-            visuals.selection.bg_fill = GruvboxLight::BLUE;
-            visuals.selection.stroke.color = GruvboxLight::BLUE;
-        }
-    }
+    visuals.widgets.active.bg_fill = c.bg2;
+    visuals.widgets.hovered.bg_fill = c.bg1;
+    visuals.widgets.inactive.bg_fill = c.bg;
+    visuals.widgets.active.fg_stroke.color = c.fg;
+    visuals.widgets.hovered.fg_stroke.color = c.fg;
+    visuals.widgets.inactive.fg_stroke.color = c.fg3;
+    visuals.widgets.noninteractive.bg_fill = c.bg;
+    visuals.widgets.noninteractive.fg_stroke.color = c.fg3;
 
     ctx.set_style(style);
 }

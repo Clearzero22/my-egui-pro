@@ -30,12 +30,7 @@ pub fn render_sidebar(ctx: &egui::Context, app: &mut HackerNewsApp) {
             ui.heading("Theme");
             ui.add_space(5.0);
 
-            let theme_label = match app.theme {
-                crate::theme::GruvboxTheme::Dark => "🌙 Dark",
-                crate::theme::GruvboxTheme::Light => "☀️ Light",
-            };
-
-            if ui.button(theme_label).clicked() {
+            if ui.button(app.theme.display_name()).clicked() {
                 app.toggle_theme();
             }
 
