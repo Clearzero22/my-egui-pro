@@ -16,6 +16,8 @@ Thumbs.db
 # Worktrees
 .worktrees/
 
+# Release builds
+release/
 
 # Added by cargo
 #
