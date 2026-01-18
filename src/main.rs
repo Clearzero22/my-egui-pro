@@ -1,6 +1,7 @@
 mod app;
 mod category;
 mod hn_api;
+mod storage;
 mod story;
 mod ui;
 
